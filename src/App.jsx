@@ -1186,6 +1186,19 @@ export default function RainMixer() {
           </div>
 
         </div>
+
+        {/* Footer */}
+        <div style={{ marginTop: "16px", textAlign: "center" }}>
+          <a href="/privacy-policy.html" style={{
+            fontSize: "11px", color: "rgba(255,255,255,0.3)",
+            fontFamily: "'DM Mono', monospace", letterSpacing: "0.1em",
+            textDecoration: "none",
+          }}
+            onMouseEnter={e => e.currentTarget.style.color = "rgba(255,255,255,0.6)"}
+            onMouseLeave={e => e.currentTarget.style.color = "rgba(255,255,255,0.3)"}
+          >PRIVACY POLICY</a>
+        </div>
+
       </div>
     </div>
   );
