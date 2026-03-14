@@ -1128,7 +1128,7 @@ export default function RainMixer() {
                 onKeyDown={e => e.key === "Enter" && savePreset()}
                 placeholder="プリセット名（省略可）"
                 style={{
-                  flex: 1, background: "rgba(255,255,255,0.05)",
+                  flex: 1, minWidth: 0, background: "rgba(255,255,255,0.05)",
                   border: "1px solid rgba(255,255,255,0.1)", borderRadius: "8px",
                   padding: "6px 10px", color: "rgba(255,255,255,0.75)",
                   fontSize: "12px", fontFamily: "'Noto Sans JP', sans-serif",
