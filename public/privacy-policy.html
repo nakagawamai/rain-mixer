@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>プライバシーポリシー / Privacy Policy — Rain Mixer</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Hiragino Kaku Gothic ProN', 'Noto Sans JP', 'Yu Gothic', sans-serif;
+      background: #080e1a;
+      color: #ccdde8;
+      min-height: 100vh;
+      padding: 48px 20px 80px;
+    }
+
+    .container {
+      max-width: 720px;
+      margin: 0 auto;
+    }
+
+    .lang-toggle {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 40px;
+    }
+
+    .lang-btn {
+      padding: 6px 16px;
+      border-radius: 6px;
+      border: 1px solid rgba(255,255,255,0.15);
+      background: rgba(255,255,255,0.05);
+      color: rgba(255,255,255,0.5);
+      cursor: pointer;
+      font-size: 12px;
+      letter-spacing: 0.1em;
+      font-family: inherit;
+      transition: all 0.2s;
+    }
+    .lang-btn.active {
+      background: rgba(100,180,230,0.18);
+      border-color: rgba(100,180,230,0.45);
+      color: rgba(140,210,255,0.9);
+    }
+
+    .section { display: none; }
+    .section.active { display: block; }
+
+    .app-name {
+      font-size: 11px;
+      letter-spacing: 0.4em;
+      color: rgba(140,200,230,0.55);
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+
+    h1 {
+      font-size: clamp(24px, 5vw, 36px);
+      font-weight: 300;
+      letter-spacing: 0.08em;
+      color: rgba(220,240,255,0.92);
+      margin-bottom: 8px;
+    }
+
+    .updated {
+      font-size: 12px;
+      color: rgba(255,255,255,0.28);
+      margin-bottom: 40px;
+      letter-spacing: 0.05em;
+    }
+
+    .divider {
+      width: 48px;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(100,180,230,0.5), transparent);
+      margin: 0 0 40px;
+    }
+
+    h2 {
+      font-size: 15px;
+      font-weight: 500;
+      color: rgba(200,230,248,0.85);
+      letter-spacing: 0.06em;
+      margin: 36px 0 12px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+    }
+
+    p {
+      font-size: 14px;
+      line-height: 1.85;
+      color: rgba(200,220,235,0.72);
+      margin-bottom: 14px;
+    }
+
+    ul {
+      margin: 8px 0 14px 20px;
+    }
+
+    ul li {
+      font-size: 14px;
+      line-height: 1.85;
+      color: rgba(200,220,235,0.72);
+      margin-bottom: 6px;
+    }
+
+    .highlight-box {
+      background: rgba(100,180,230,0.07);
+      border: 1px solid rgba(100,180,230,0.18);
+      border-left: 3px solid rgba(100,180,230,0.5);
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin: 16px 0;
+    }
+
+    .highlight-box p {
+      margin: 0;
+      color: rgba(180,220,245,0.8);
+    }
+
+    .contact-box {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.09);
+      border-radius: 12px;
+      padding: 20px 24px;
+      margin-top: 16px;
+    }
+
+    .contact-box p {
+      margin: 0;
+    }
+
+    footer {
+      margin-top: 60px;
+      padding-top: 24px;
+      border-top: 1px solid rgba(255,255,255,0.07);
+      text-align: center;
+      font-size: 11px;
+      color: rgba(255,255,255,0.2);
+      letter-spacing: 0.1em;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <!-- Language Toggle -->
+  <div class="lang-toggle">
+    <button class="lang-btn active" onclick="setLang('ja')">日本語</button>
+    <button class="lang-btn" onclick="setLang('en')">English</button>
+  </div>
+
+  <!-- ── 日本語 ── -->
+  <div class="section active" id="ja">
+    <p class="app-name">Rain Mixer</p>
+    <h1>プライバシーポリシー</h1>
+    <p class="updated">最終更新日：2025年3月</p>
+    <div class="divider"></div>
+
+    <div class="highlight-box">
+      <p>Rain Mixer は、ユーザーの個人情報を収集・送信しません。すべてのデータはお使いのデバイス上にのみ保存されます。</p>
+    </div>
+
+    <h2>1. 収集する情報</h2>
+    <p>Rain Mixer は、以下の情報のみをデバイス上に保存します：</p>
+    <ul>
+      <li>プリセット設定（音の種類・音量）</li>
+    </ul>
+    <p>これらのデータは端末のローカルストレージに保存され、外部サーバーへ送信されることはありません。</p>
+
+    <h2>2. 収集しない情報</h2>
+    <p>本アプリは以下の情報を一切収集しません：</p>
+    <ul>
+      <li>氏名・メールアドレス等の個人識別情報</li>
+      <li>位置情報</li>
+      <li>使用状況・行動データ（アナリティクス）</li>
+      <li>クラッシュレポート</li>
+      <li>広告識別子（IDFA / GAID）</li>
+      <li>連絡先・写真・マイクへのアクセス</li>
+    </ul>
+
+    <h2>3. サードパーティサービス</h2>
+    <p>本アプリは以下のサードパーティリソースを使用しています：</p>
+    <ul>
+      <li><strong>Unsplash</strong> — 背景画像（CC0ライセンス）。Unsplashのサーバーから画像を読み込む際、IPアドレスが記録される場合があります。</li>
+      <li><strong>Google Fonts</strong> — フォントの読み込みに使用。Google Fontsのプライバシーポリシーが適用されます。</li>
+    </ul>
+    <p>アナリティクス・広告・トラッキングのためのサードパーティSDKは使用していません。</p>
+
+    <h2>4. データの保存と削除</h2>
+    <p>プリセットデータはお使いのデバイス内にのみ存在します。アプリを削除するとすべてのデータが消去されます。</p>
+
+    <h2>5. 子どものプライバシー</h2>
+    <p>本アプリは年齢制限のないリラクゼーションツールです。13歳未満のお子様から個人情報を意図的に収集することはありません。</p>
+
+    <h2>6. 本ポリシーの変更</h2>
+    <p>プライバシーポリシーを変更した場合は、このページにて最新版を公開します。重要な変更がある場合はアプリ内でお知らせします。</p>
+
+    <h2>7. お問い合わせ</h2>
+    <p>プライバシーに関するご質問は下記までお問い合わせください：</p>
+    <div class="contact-box">
+      <p>開発者：<strong>仲川 舞</strong><br>
+      メール：<strong>barairopop0319@gmail.com</strong></p>
+    </div>
+  </div>
+
+  <!-- ── English ── -->
+  <div class="section" id="en">
+    <p class="app-name">Rain Mixer</p>
+    <h1>Privacy Policy</h1>
+    <p class="updated">Last updated: March 2025</p>
+    <div class="divider"></div>
+
+    <div class="highlight-box">
+      <p>Rain Mixer does not collect or transmit any personal information. All data is stored locally on your device only.</p>
+    </div>
+
+    <h2>1. Information We Collect</h2>
+    <p>Rain Mixer stores only the following data on your device:</p>
+    <ul>
+      <li>Preset settings (sound type and volume level)</li>
+    </ul>
+    <p>This data is saved in your device's local storage and is never transmitted to any external server.</p>
+
+    <h2>2. Information We Do Not Collect</h2>
+    <p>This app does not collect any of the following:</p>
+    <ul>
+      <li>Personal identifiers (name, email address, etc.)</li>
+      <li>Location data</li>
+      <li>Usage or behavioral data (analytics)</li>
+      <li>Crash reports</li>
+      <li>Advertising identifiers (IDFA / GAID)</li>
+      <li>Access to contacts, photos, or microphone</li>
+    </ul>
+
+    <h2>3. Third-Party Services</h2>
+    <p>This app uses the following third-party resources:</p>
+    <ul>
+      <li><strong>Unsplash</strong> — Background image (CC0 license). Your IP address may be logged by Unsplash's servers when the image is loaded.</li>
+      <li><strong>Google Fonts</strong> — Used for font loading. Google Fonts' privacy policy applies.</li>
+    </ul>
+    <p>No third-party SDKs for analytics, advertising, or tracking are used.</p>
+
+    <h2>4. Data Storage and Deletion</h2>
+    <p>Preset data exists only on your device. Uninstalling the app will erase all stored data.</p>
+
+    <h2>5. Children's Privacy</h2>
+    <p>This app is a relaxation tool with no age restrictions. We do not knowingly collect personal information from children under 13.</p>
+
+    <h2>6. Changes to This Policy</h2>
+    <p>If we update this Privacy Policy, the latest version will be published on this page. Significant changes will be announced within the app.</p>
+
+    <h2>7. Contact</h2>
+    <p>For any privacy-related questions, please contact:</p>
+    <div class="contact-box">
+      <p>Developer: <strong>Mai Nakagawa</strong><br>
+      Email: <strong>barairopop0319@gmail.com</strong></p>
+    </div>
+  </div>
+
+  <footer>
+    © 2025 Rain Mixer — 仲川 舞 (Mai Nakagawa)
+  </footer>
+
+</div>
+
+<script>
+  function setLang(lang) {
+    document.querySelectorAll('.section').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.lang-btn').forEach(el => el.classList.remove('active'));
+    document.getElementById(lang).classList.add('active');
+    document.querySelectorAll('.lang-btn').forEach(btn => {
+      if (btn.textContent.includes(lang === 'ja' ? '日本語' : 'English')) btn.classList.add('active');
+    });
+  }
+</script>
+</body>
+</html>
