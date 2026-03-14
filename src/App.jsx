@@ -994,7 +994,7 @@ export default function RainMixer() {
 
         {/* Glass panel */}
         <div style={{
-          width: "100%", maxWidth: "560px",
+          width: "100%", maxWidth: "560px", boxSizing: "border-box",
           background: "rgba(8,18,32,0.45)",
           backdropFilter: "blur(24px) saturate(1.6)", WebkitBackdropFilter: "blur(24px) saturate(1.6)",
           border: "1px solid rgba(255,255,255,0.12)", borderTop: "1px solid rgba(255,255,255,0.2)",
