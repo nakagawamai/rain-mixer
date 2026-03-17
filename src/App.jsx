@@ -1039,122 +1039,6 @@ function PlayButton({ isPlaying, onClick, accentMain = "100,190,240", accentLigh
   );
 }
 
-// ── PWA Install Banner ───────────────────────────────────────────────────────────
-const AntennaIcon = () => (
-  <svg width="28" height="28" viewBox="0 0 192 192" fill="none">
-    <line x1="96" y1="96" x2="96" y2="155" stroke="rgba(140,210,255,0.9)" strokeWidth="8" strokeLinecap="round"/>
-    <line x1="96" y1="96" x2="30" y2="42" stroke="rgba(140,210,255,0.9)" strokeWidth="8" strokeLinecap="round"/>
-    <line x1="96" y1="96" x2="162" y2="42" stroke="rgba(140,210,255,0.9)" strokeWidth="8" strokeLinecap="round"/>
-    <line x1="96" y1="96" x2="52" y2="62" stroke="rgba(140,210,255,0.5)" strokeWidth="5" strokeLinecap="round"/>
-    <line x1="96" y1="96" x2="140" y2="62" stroke="rgba(140,210,255,0.5)" strokeWidth="5" strokeLinecap="round"/>
-    <circle cx="96" cy="96" r="14" fill="rgba(140,210,255,0.95)"/>
-    <circle cx="96" cy="96" r="8" fill="rgba(220,240,255,0.98)"/>
-  </svg>
-);
-
-function PWABanner() {
-  const [mode, setMode] = useState(null); // null | "safari" | "not-safari"
-  const [dismissed, setDismissed] = useState(false);
-
-  useEffect(() => {
-    const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
-    const isStandalone = window.navigator.standalone;
-    const wasDismissed = localStorage.getItem("pwa_banner_dismissed");
-    if (!isIOS || isStandalone || wasDismissed) return;
-    const isSafari = /safari/i.test(navigator.userAgent) && !/crios|fxios|opios|mercury/i.test(navigator.userAgent);
-    setMode(isSafari ? "safari" : "not-safari");
-  }, []);
-
-  const dismiss = () => {
-    setDismissed(true);
-    setMode(null);
-    localStorage.setItem("pwa_banner_dismissed", "1");
-  };
-
-  if (!mode || dismissed) return null;
-
-  return (
-    <div style={{
-      position: "fixed", bottom: "20px", left: "50%",
-      transform: "translateX(-50%)",
-      width: "calc(100% - 32px)", maxWidth: "520px",
-      background: "rgba(8,18,32,0.90)",
-      backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)",
-      border: "1px solid rgba(255,255,255,0.15)",
-      borderTop: "1px solid rgba(255,255,255,0.25)",
-      borderRadius: "16px", padding: "16px 18px",
-      zIndex: 1000,
-      boxShadow: "0 8px 40px rgba(0,0,0,0.55)",
-    }}>
-      <div style={{ display: "flex", alignItems: "flex-start", gap: "12px" }}>
-        {/* Icon */}
-        <div style={{
-          width: "44px", height: "44px", borderRadius: "10px", flexShrink: 0,
-          background: "rgba(100,180,230,0.15)",
-          border: "1px solid rgba(100,180,230,0.3)",
-          display: "flex", alignItems: "center", justifyContent: "center",
-        }}>
-          <AntennaIcon />
-        </div>
-
-        <div style={{ flex: 1 }}>
-          <p style={{
-            fontSize: "13px", fontWeight: "500",
-            color: "rgba(220,240,255,0.95)", margin: "0 0 5px",
-            fontFamily: "'Noto Sans JP', sans-serif",
-          }}>
-            {mode === "safari" ? "ホーム画面に追加しよう" : "Safariで開いてね"}
-          </p>
-          <p style={{
-            fontSize: "11px", color: "rgba(180,210,230,0.65)",
-            margin: "0 0 12px", lineHeight: "1.7",
-            fontFamily: "'Noto Sans JP', sans-serif",
-          }}>
-            {mode === "safari" ? (
-              <>
-                下の
-                <span style={{ display: "inline-flex", alignItems: "center", margin: "0 3px", verticalAlign: "middle" }}>
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none">
-                    <path d="M12 2 L12 15" stroke="rgba(100,180,255,0.9)" strokeWidth="2" strokeLinecap="round"/>
-                    <path d="M7 7 L12 2 L17 7" stroke="rgba(100,180,255,0.9)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    <path d="M5 12 L5 20 L19 20 L19 12" stroke="rgba(100,180,255,0.9)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                </span>
-                ボタンを押して「ホーム画面に追加」をタップすると、アプリとして使えます
-              </>
-            ) : (
-              "このアプリをホーム画面に追加するには、Safariで開く必要があります。下のボタンからURLをコピーしてSafariに貼り付けてください。"
-            )}
-          </p>
-
-          <div style={{ display: "flex", gap: "8px" }}>
-            {mode === "not-safari" && (
-              <button onClick={() => {
-                navigator.clipboard?.writeText(window.location.href).catch(() => {});
-                alert("URLをコピーしました！Safariに貼り付けてください。");
-              }} style={{
-                flex: 1, padding: "8px", borderRadius: "8px",
-                background: "rgba(100,180,230,0.18)",
-                border: "1px solid rgba(100,180,230,0.4)",
-                color: "rgba(140,210,255,0.9)", fontSize: "12px",
-                cursor: "pointer", fontFamily: "'Noto Sans JP', sans-serif",
-              }}>URLをコピー</button>
-            )}
-            <button onClick={dismiss} style={{
-              flex: mode === "safari" ? 1 : 0, padding: "8px 14px", borderRadius: "8px",
-              background: mode === "safari" ? "rgba(100,180,230,0.18)" : "rgba(255,255,255,0.05)",
-              border: `1px solid ${mode === "safari" ? "rgba(100,180,230,0.4)" : "rgba(255,255,255,0.1)"}`,
-              color: mode === "safari" ? "rgba(140,210,255,0.9)" : "rgba(255,255,255,0.4)",
-              fontSize: "12px", cursor: "pointer",
-              fontFamily: "'Noto Sans JP', sans-serif",
-            }}>{mode === "safari" ? "わかった！" : "後で"}</button>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 // ── Main ───────────────────────────────────────────────────────────────────────
 export default function RainMixer() {
   const [selectedId, setSelectedId] = useState(DEFAULT_IDS[0]);
@@ -1361,7 +1245,7 @@ export default function RainMixer() {
 
         {/* Glass panel */}
         <div style={{
-          width: "100%", maxWidth: "560px",
+          width: "100%", maxWidth: "560px", boxSizing: "border-box",
           background: "rgba(8,18,32,0.45)",
           backdropFilter: "blur(24px) saturate(1.6)", WebkitBackdropFilter: "blur(24px) saturate(1.6)",
           border: "1px solid rgba(255,255,255,0.12)", borderTop: "1px solid rgba(255,255,255,0.2)",
@@ -1495,7 +1379,7 @@ export default function RainMixer() {
                 onKeyDown={e => e.key === "Enter" && savePreset()}
                 placeholder="プリセット名（省略可）"
                 style={{
-                  flex: 1, background: "rgba(255,255,255,0.05)",
+                  flex: 1, minWidth: 0, background: "rgba(255,255,255,0.05)",
                   border: "1px solid rgba(255,255,255,0.1)", borderRadius: "8px",
                   padding: "6px 10px", color: "rgba(255,255,255,0.75)",
                   fontSize: "12px", fontFamily: "'Noto Sans JP', sans-serif",
@@ -1553,6 +1437,19 @@ export default function RainMixer() {
           </div>
 
         </div>
+
+        {/* Footer */}
+        <div style={{ marginTop: "16px", textAlign: "center" }}>
+          <a href="/privacy-policy.html" style={{
+            fontSize: "11px", color: "rgba(255,255,255,0.3)",
+            fontFamily: "'DM Mono', monospace", letterSpacing: "0.1em",
+            textDecoration: "none",
+          }}
+            onMouseEnter={e => e.currentTarget.style.color = "rgba(255,255,255,0.6)"}
+            onMouseLeave={e => e.currentTarget.style.color = "rgba(255,255,255,0.3)"}
+          >PRIVACY POLICY</a>
+        </div>
+
       </div>
     </div>
   );
