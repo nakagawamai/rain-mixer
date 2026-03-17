@@ -1214,7 +1214,6 @@ export default function RainMixer() {
         transition: "background 2.5s ease",
       }} />
       <AnimatedBG animation={currentCategory.animation} dropColor={currentCategory.bg.dropColor} />
-      <PWABanner />
 
       {/* Content */}
       <div style={{
