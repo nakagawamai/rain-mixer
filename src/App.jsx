@@ -365,6 +365,61 @@ input[type=range]::-moz-range-thumb {
   animation: floatup ease-in-out infinite;
   z-index: 2;
 }
+
+/* ── Music Player UI ── */
+.photo-bg {
+  position: fixed; inset: 0; z-index: 0;
+  background-size: cover; background-position: center;
+  transition: background-image 0s, opacity 1.2s ease;
+}
+.photo-overlay {
+  position: fixed; inset: 0; z-index: 1;
+  background: linear-gradient(to bottom, rgba(0,0,0,0.25) 0%, rgba(0,0,0,0.55) 100%);
+}
+.player-card {
+  background: rgba(255,255,255,0.12);
+  backdrop-filter: blur(32px) saturate(1.8);
+  -webkit-backdrop-filter: blur(32px) saturate(1.8);
+  border: 1px solid rgba(255,255,255,0.20);
+  border-top: 1px solid rgba(255,255,255,0.32);
+  border-radius: 28px;
+  box-shadow: 0 32px 80px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.15);
+}
+.transport-btn {
+  background: none; border: none; cursor: pointer; padding: 0;
+  display: flex; align-items: center; justify-content: center;
+  transition: opacity 0.15s, transform 0.1s;
+  -webkit-tap-highlight-color: transparent;
+}
+.transport-btn:active { transform: scale(0.88); }
+.bg-switcher {
+  display: flex; gap: 6px; align-items: center; flex-wrap: wrap; justify-content: center;
+}
+.bg-dot {
+  width: 28px; height: 28px; border-radius: 8px;
+  border: 1.5px solid rgba(255,255,255,0.18);
+  cursor: pointer; overflow: hidden; flex-shrink: 0;
+  transition: border-color 0.2s, transform 0.15s;
+  background-size: cover; background-position: center;
+}
+.bg-dot:hover { transform: scale(1.12); }
+.bg-dot.active {
+  border-color: rgba(255,255,255,0.80);
+  box-shadow: 0 0 0 2px rgba(255,255,255,0.25);
+}
+.section-toggle {
+  background: none; border: none; cursor: pointer;
+  display: flex; align-items: center; gap: 6px; padding: 0;
+  color: rgba(255,255,255,0.28);
+  font-family: 'DM Mono', monospace; font-size: 10px;
+  letter-spacing: 0.25em; text-transform: uppercase;
+  -webkit-tap-highlight-color: transparent;
+}
+.section-toggle svg { transition: transform 0.2s; }
+.section-toggle.open svg { transform: rotate(180deg); }
+@media (max-width: 420px) {
+  .album-art-wrap { max-width: 140px !important; }
+}
 `;
 
 // ── Animated background data ──────────────────────────────────────────────────
@@ -1039,6 +1094,113 @@ function PlayButton({ isPlaying, onClick, accentMain = "100,190,240", accentLigh
   );
 }
 
+// ── Clock Display ──────────────────────────────────────────────────────────────
+function ClockDisplay({ color = "rgba(255,255,255,0.30)" }) {
+  const fmt = () => {
+    const d = new Date();
+    return `${d.getHours().toString().padStart(2, "0")}:${d.getMinutes().toString().padStart(2, "0")}`;
+  };
+  const [time, setTime] = useState(fmt);
+  useEffect(() => {
+    const id = setInterval(() => setTime(fmt()), 10000);
+    return () => clearInterval(id);
+  }, []);
+  return (
+    <span style={{
+      fontSize: "clamp(28px, 8vw, 40px)", letterSpacing: "0.10em",
+      color, fontFamily: "'DM Mono', monospace", fontWeight: 300,
+    }}>{time}</span>
+  );
+}
+
+// ── Default photo backgrounds ──────────────────────────────────────────────────
+const DEFAULT_PHOTOS = [
+  { id: "default_sunset", src: "/bg_sunset.jpg", label: "夕焼けビーチ" },
+  { id: "default_storm",  src: "/bg_storm.jpg",  label: "嵐の夜の海" },
+  { id: "default_piano",  src: "/bg_piano.jpg",  label: "ピアノ＆クリスタル" },
+  { id: "default_moon",   src: "/bg_moon.jpg",   label: "月夜のピアノ" },
+];
+
+// ── Background Switcher ────────────────────────────────────────────────────────
+function BackgroundSwitcher({ bgMode, onSelect, currentCategoryId, userPhotos, onAddPhoto, onDeletePhoto }) {
+  const fileRef = useRef(null);
+  const [pressing, setPressing] = useState(null);
+  const pressTimer = useRef(null);
+
+  const animItems = SOUND_CATEGORIES.map(cat => ({
+    key: `animated:${cat.id}`,
+    style: { background: cat.bg.gradient },
+    label: cat.name,
+  }));
+
+  const activeKey = bgMode === "auto"
+    ? `animated:${currentCategoryId}`
+    : bgMode;
+
+  const handlePress = (key) => {
+    if (!key.startsWith("photo:")) return;
+    pressTimer.current = setTimeout(() => {
+      if (window.confirm("この写真を削除しますか？")) {
+        onDeletePhoto(key.replace("photo:", ""));
+      }
+    }, 600);
+  };
+  const handleRelease = () => clearTimeout(pressTimer.current);
+
+  return (
+    <div className="bg-switcher">
+      {/* Animated category dots */}
+      {animItems.map(item => (
+        <button
+          key={item.key}
+          title={item.label}
+          className={`bg-dot${activeKey === item.key ? " active" : ""}`}
+          style={item.style}
+          onClick={() => onSelect(item.key)}
+        />
+      ))}
+      {/* Default photo dots */}
+      {DEFAULT_PHOTOS.map(photo => (
+        <button
+          key={photo.id}
+          title={photo.label}
+          className={`bg-dot${bgMode === `preset:${photo.id}` ? " active" : ""}`}
+          style={{ backgroundImage: `url(${photo.src})`, backgroundSize: "cover", backgroundPosition: "center" }}
+          onClick={() => onSelect(`preset:${photo.id}`)}
+        />
+      ))}
+      {/* User photo dots */}
+      {userPhotos.map(photo => (
+        <button
+          key={photo.id}
+          title={photo.label}
+          className={`bg-dot${activeKey === `photo:${photo.id}` ? " active" : ""}`}
+          style={{ backgroundImage: `url(${photo.dataUrl})` }}
+          onClick={() => onSelect(`photo:${photo.id}`)}
+          onMouseDown={() => handlePress(`photo:${photo.id}`)}
+          onMouseUp={handleRelease}
+          onTouchStart={() => handlePress(`photo:${photo.id}`)}
+          onTouchEnd={handleRelease}
+        />
+      ))}
+      {/* Add photo button */}
+      <button
+        title="写真を追加"
+        className="bg-dot"
+        style={{ background: "rgba(255,255,255,0.08)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "16px", color: "rgba(255,255,255,0.5)" }}
+        onClick={() => fileRef.current?.click()}
+      >＋</button>
+      <input
+        ref={fileRef}
+        type="file"
+        accept="image/*"
+        style={{ display: "none" }}
+        onChange={e => { if (e.target.files[0]) { onAddPhoto(e.target.files[0]); e.target.value = ""; } }}
+      />
+    </div>
+  );
+}
+
 // ── Main ───────────────────────────────────────────────────────────────────────
 export default function RainMixer() {
   const [selectedId, setSelectedId] = useState(DEFAULT_IDS[0]);
@@ -1078,6 +1240,17 @@ export default function RainMixer() {
   const [showPresets, setShowPresets] = useState(false);
   const [presetName, setPresetName] = useState("");
 
+  // Background system
+  const [bgMode, setBgMode] = useState("auto");
+  const [userOverrideBg, setUserOverrideBg] = useState(false);
+  const [userPhotos, setUserPhotos] = useState(() => {
+    try { return JSON.parse(localStorage.getItem("rmbgs") || "[]"); } catch { return []; }
+  });
+
+  // Collapsible sections
+  const [showTimer, setShowTimer] = useState(false);
+  const [showPresetSection, setShowPresetSection] = useState(false);
+
   const { startSound, stopSound, setGain, stopAll } = useAudioEngine();
 
   const currentCategory = SOUND_CATEGORIES.find(c => c.soundIds.includes(selectedId)) || SOUND_CATEGORIES[0];
@@ -1087,6 +1260,25 @@ export default function RainMixer() {
   const channels = [ALL_SOUNDS.find(s => s.id === selectedId)].filter(Boolean);
   const channelIds = [selectedId];
   const volumes = { [selectedId]: volume };
+  const currentSound = ALL_SOUNDS.find(s => s.id === selectedId);
+  const SoundIcon = currentSound ? icons[currentSound.id] : null;
+
+  // Resolved background
+  const resolvedBg = (() => {
+    if (bgMode.startsWith("preset:")) {
+      const p = DEFAULT_PHOTOS.find(p => p.id === bgMode.replace("preset:", ""));
+      return p ? { type: "photo", url: p.src } : { type: "animated", category: currentCategory };
+    }
+    if (bgMode.startsWith("photo:")) {
+      const photo = userPhotos.find(p => p.id === bgMode.replace("photo:", ""));
+      return photo ? { type: "photo", url: photo.dataUrl } : { type: "animated", category: currentCategory };
+    }
+    if (bgMode.startsWith("animated:")) {
+      const cat = SOUND_CATEGORIES.find(c => c.id === bgMode.replace("animated:", ""));
+      return cat ? { type: "animated", category: cat } : { type: "animated", category: currentCategory };
+    }
+    return { type: "animated", category: currentCategory };
+  })();
 
   // Start/stop
   const togglePlay = useCallback(() => {
@@ -1116,7 +1308,8 @@ export default function RainMixer() {
       setTimeout(() => setGain(id, volume), 300);
     }
     setSelectedId(id);
-  }, [isPlaying, selectedId, volume, stopSound, startSound, setGain]);
+    if (!userOverrideBg) setBgMode("auto");
+  }, [isPlaying, selectedId, volume, stopSound, startSound, setGain, userOverrideBg]);
 
   const removeChannel = useCallback(() => {}, []);
 
@@ -1191,6 +1384,52 @@ export default function RainMixer() {
     setTimerRemaining(null);
   }, []);
 
+  // Background callbacks
+  const handleBgSelect = useCallback((key) => {
+    setUserOverrideBg(true);
+    setBgMode(key);
+  }, []);
+
+  const handleAddPhoto = useCallback((file) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const id = `photo_${Date.now()}`;
+      const photo = { id, dataUrl: e.target.result, label: file.name.replace(/\.[^.]+$/, "") };
+      setUserPhotos(prev => {
+        const next = [...prev, photo];
+        localStorage.setItem("rmbgs", JSON.stringify(next));
+        return next;
+      });
+      setBgMode(`photo:${id}`);
+      setUserOverrideBg(true);
+    };
+    reader.readAsDataURL(file);
+  }, []);
+
+  const handleDeletePhoto = useCallback((id) => {
+    setUserPhotos(prev => {
+      const next = prev.filter(p => p.id !== id);
+      localStorage.setItem("rmbgs", JSON.stringify(next));
+      return next;
+    });
+    setBgMode(prev => prev === `photo:${id}` ? "auto" : prev);
+  }, []);
+
+  // Navigate sounds within current category
+  const prevSound = useCallback(() => {
+    const list = currentCategory.soundIds;
+    const idx = list.indexOf(selectedId);
+    const newId = list[(idx - 1 + list.length) % list.length];
+    addChannel(newId);
+  }, [selectedId, currentCategory, addChannel]);
+
+  const nextSound = useCallback(() => {
+    const list = currentCategory.soundIds;
+    const idx = list.indexOf(selectedId);
+    const newId = list[(idx + 1) % list.length];
+    addChannel(newId);
+  }, [selectedId, currentCategory, addChannel]);
+
   // Format seconds to MM:SS
   const formatTime = (secs) => {
     if (secs === null) return "";
@@ -1207,49 +1446,66 @@ export default function RainMixer() {
     }}>
       <style>{GLOBAL_CSS}</style>
 
-      {/* Background */}
-      <div style={{
-        position: "fixed", inset: 0, zIndex: 0,
-        background: currentCategory.bg.gradient,
-        transition: "background 2.5s ease",
-      }} />
-      <AnimatedBG animation={currentCategory.animation} dropColor={currentCategory.bg.dropColor} />
+      {/* ── Background ── */}
+      {resolvedBg.type === "photo" ? (
+        <>
+          <div className="photo-bg" style={{ backgroundImage: `url(${resolvedBg.url})` }} />
+          <div className="photo-overlay" />
+          <AnimatedBG animation={currentCategory.animation} dropColor={currentCategory.bg.dropColor} />
+        </>
+      ) : (
+        <>
+          <div style={{
+            position: "fixed", inset: 0, zIndex: 0,
+            background: resolvedBg.category.bg.gradient,
+            transition: "background 2.5s ease",
+          }} />
+          <AnimatedBG animation={resolvedBg.category.animation} dropColor={resolvedBg.category.bg.dropColor} />
+        </>
+      )}
 
-      {/* Content */}
+      {/* ── Content ── */}
       <div style={{
         position: "relative", zIndex: 10,
         display: "flex", flexDirection: "column", alignItems: "center",
         padding: "28px 20px 28px", minHeight: "100vh",
       }}>
+
         {/* Header */}
-        <header style={{ textAlign: "center", marginBottom: "32px" }}>
-          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "10px", marginBottom: "6px" }}>
+        <header style={{ textAlign: "center", marginBottom: "16px" }}>
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", gap: "4px" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+              <svg width="28" height="24" viewBox="0 0 32 28" fill="none" style={{
+                opacity: 0.7,
+                transform: `rotate(${antennaRot}deg)`, transformOrigin: "50% 50%",
+              }}>
+                <line x1="16" y1="14" x2="16" y2="28" stroke="rgba(200,230,248,0.8)" strokeWidth="1.5" strokeLinecap="round"/>
+                <line x1="16" y1="14" x2="4" y2="4" stroke="rgba(200,230,248,0.8)" strokeWidth="1.5" strokeLinecap="round"/>
+                <line x1="16" y1="14" x2="28" y2="4" stroke="rgba(200,230,248,0.8)" strokeWidth="1.5" strokeLinecap="round"/>
+                <line x1="16" y1="14" x2="8" y2="8" stroke="rgba(200,230,248,0.5)" strokeWidth="1" strokeLinecap="round"/>
+                <line x1="16" y1="14" x2="24" y2="8" stroke="rgba(200,230,248,0.5)" strokeWidth="1" strokeLinecap="round"/>
+                <circle cx="16" cy="14" r="2.5" fill="rgba(140,210,255,0.9)"/>
+              </svg>
+              <p style={{
+                fontSize: "clamp(18px, 5vw, 36px)", fontWeight: 300,
+                letterSpacing: "0.4em", color: "rgba(230,240,248,0.95)",
+                textTransform: "uppercase", textShadow: "0 2px 8px rgba(0,0,0,0.4)",
+                fontFamily: "'DM Mono', monospace", margin: 0, whiteSpace: "nowrap",
+              }}>Rain Mixer</p>
+            </div>
             <p style={{
-              fontSize: "clamp(13px, 2.8vw, 22px)", fontWeight: 300,
-              letterSpacing: "0.4em", color: "rgba(230,240,248,0.95)",
-              textTransform: "uppercase",
-              textShadow: "0 2px 8px rgba(0,0,0,0.4)",
+              fontSize: "clamp(9px, 1.8vw, 13px)", fontWeight: 300,
+              letterSpacing: "0.3em", color: "rgba(200,225,245,0.6)",
+              textTransform: "uppercase", textShadow: "0 1px 4px rgba(0,0,0,0.3)",
               fontFamily: "'DM Mono', monospace", margin: 0, whiteSpace: "nowrap",
+              paddingLeft: "40px",
             }}>Ambient Sound Studio</p>
-            <svg width="28" height="24" viewBox="0 0 32 28" fill="none" style={{ opacity: 0.7, transform: `rotate(${antennaRot}deg)`, transformOrigin: "50% 50%", marginTop: "10px", marginBottom: "-4px" }}>
-              <line x1="16" y1="14" x2="16" y2="28" stroke="rgba(200,230,248,0.8)" strokeWidth="1.5" strokeLinecap="round"/>
-              <line x1="16" y1="14" x2="4" y2="4" stroke="rgba(200,230,248,0.8)" strokeWidth="1.5" strokeLinecap="round"/>
-              <line x1="16" y1="14" x2="28" y2="4" stroke="rgba(200,230,248,0.8)" strokeWidth="1.5" strokeLinecap="round"/>
-              <line x1="16" y1="14" x2="8" y2="8" stroke="rgba(200,230,248,0.5)" strokeWidth="1" strokeLinecap="round"/>
-              <line x1="16" y1="14" x2="24" y2="8" stroke="rgba(200,230,248,0.5)" strokeWidth="1" strokeLinecap="round"/>
-              <circle cx="16" cy="14" r="2.5" fill="rgba(140,210,255,0.9)"/>
-            </svg>
           </div>
         </header>
 
-        {/* Glass panel */}
-        <div style={{
-          width: "100%", maxWidth: "560px", boxSizing: "border-box",
-          background: "rgba(8,18,32,0.45)",
-          backdropFilter: "blur(24px) saturate(1.6)", WebkitBackdropFilter: "blur(24px) saturate(1.6)",
-          border: "1px solid rgba(255,255,255,0.12)", borderTop: "1px solid rgba(255,255,255,0.2)",
-          borderRadius: "22px", padding: "16px",
-          boxShadow: "0 32px 80px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.08)",
+        {/* ── Glass panel ── */}
+        <div className="player-card" style={{
+          width: "100%", maxWidth: "560px", boxSizing: "border-box", padding: "16px",
         }}>
           {/* Toolbar */}
           <div style={{
@@ -1262,15 +1518,13 @@ export default function RainMixer() {
             <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
               <PlayButton isPlaying={isPlaying} onClick={togglePlay} accentMain={am} accentLight={al} />
               <span style={{
-                fontFamily: "'DM Mono', monospace",
-                fontSize: "10px", letterSpacing: "0.2em",
+                fontFamily: "'DM Mono', monospace", fontSize: "10px", letterSpacing: "0.2em",
                 color: isPlaying ? `rgba(${al},0.75)` : "rgba(255,255,255,0.25)",
                 transition: "color 0.3s",
               }}>
                 {isPlaying ? "PLAYING" : "PAUSED"}
               </span>
             </div>
-
             {/* Add button */}
             <div style={{ position: "static" }}>
               <button onClick={() => setShowAdd(v => !v)} style={{
@@ -1293,25 +1547,16 @@ export default function RainMixer() {
             </div>
           </div>
 
-          {/* Channel list */}
+          {/* Channel row */}
           <div style={{ display: "flex", flexDirection: "column", gap: "5px" }}>
-            {channels.length === 0 ? (
-              <div style={{
-                textAlign: "center", padding: "40px 0",
-                color: "rgba(255,255,255,0.15)", fontSize: "12px",
-                letterSpacing: "0.12em", fontFamily: "'DM Mono', monospace",
-              }}>「＋ SOUND を追加」からチャンネルを追加</div>
-            ) : channels.map(sound => (
+            {channels.map(sound => (
               <ChannelRow key={sound.id} sound={sound}
                 volume={volumes[sound.id]}
                 onChange={v => setVol(sound.id, v)}
-                onRemove={() => removeChannel(sound.id)}
+                onRemove={() => {}}
               />
             ))}
           </div>
-
-
-
           {channels.length > 0 && (
             <p style={{
               marginTop: "10px", fontFamily: "'DM Mono', monospace",
@@ -1320,7 +1565,26 @@ export default function RainMixer() {
             }}>← スライダーを左右にドラッグ →</p>
           )}
 
-          {/* Timer */}
+          {/* Background switcher */}
+          <div style={{
+            marginTop: "14px", paddingTop: "14px", paddingBottom: "2px",
+            borderTop: "1px solid rgba(255,255,255,0.07)",
+          }}>
+            <div style={{
+              fontSize: "9px", letterSpacing: "0.28em", color: "rgba(255,255,255,0.22)",
+              fontFamily: "'DM Mono', monospace", textAlign: "center", marginBottom: "8px",
+            }}>BACKGROUND</div>
+            <BackgroundSwitcher
+              bgMode={bgMode}
+              onSelect={handleBgSelect}
+              currentCategoryId={currentCategory.id}
+              userPhotos={userPhotos}
+              onAddPhoto={handleAddPhoto}
+              onDeletePhoto={handleDeletePhoto}
+            />
+          </div>
+
+          {/* Sleep Timer */}
           <div style={{
             marginTop: "14px", paddingTop: "14px",
             borderTop: "1px solid rgba(255,255,255,0.07)",
@@ -1348,8 +1612,7 @@ export default function RainMixer() {
               {[5, 10, 15, 20, 30, 45, 60, 120, 180].map(min => (
                 <button key={min} onClick={() => startTimer(min)} style={{
                   padding: "5px 10px", borderRadius: "7px", cursor: "pointer",
-                  fontFamily: "'DM Mono', monospace", fontSize: "11px",
-                  letterSpacing: "0.05em",
+                  fontFamily: "'DM Mono', monospace", fontSize: "11px", letterSpacing: "0.05em",
                   background: timerMinutes === min ? `rgba(${am},0.2)` : "rgba(255,255,255,0.05)",
                   border: `1px solid ${timerMinutes === min ? `rgba(${am},0.5)` : "rgba(255,255,255,0.1)"}`,
                   color: timerMinutes === min ? `rgba(${al},0.9)` : "rgba(255,255,255,0.45)",
@@ -1358,6 +1621,7 @@ export default function RainMixer() {
               ))}
             </div>
           </div>
+
           {/* Preset */}
           <div style={{
             marginTop: "14px", paddingTop: "14px",
@@ -1369,9 +1633,7 @@ export default function RainMixer() {
                 letterSpacing: "0.25em", color: "rgba(255,255,255,0.28)",
               }}>PRESET</span>
             </div>
-
-            {/* Save new preset */}
-            <div style={{ display: "flex", gap: "7px", marginBottom: presets.length > 0 || showPresets ? "10px" : "0" }}>
+            <div style={{ display: "flex", gap: "7px", marginBottom: presets.length > 0 ? "10px" : "0" }}>
               <input
                 value={presetName}
                 onChange={e => setPresetName(e.target.value)}
@@ -1381,8 +1643,7 @@ export default function RainMixer() {
                   flex: 1, minWidth: 0, background: "rgba(255,255,255,0.05)",
                   border: "1px solid rgba(255,255,255,0.1)", borderRadius: "8px",
                   padding: "6px 10px", color: "rgba(255,255,255,0.75)",
-                  fontSize: "12px", fontFamily: "'Noto Sans JP', sans-serif",
-                  outline: "none",
+                  fontSize: "12px", fontFamily: "'Noto Sans JP', sans-serif", outline: "none",
                 }}
               />
               <button onClick={savePreset} style={{
@@ -1392,25 +1653,21 @@ export default function RainMixer() {
                 fontFamily: "'Noto Sans JP', sans-serif", whiteSpace: "nowrap",
               }}>保存</button>
             </div>
-
-            {/* Preset list */}
             {presets.length > 0 && (
               <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
                 {presets.map(p => {
                   const sound = ALL_SOUNDS.find(s => s.id === p.soundId);
-                  const Icon = sound ? icons[sound.id] : null;
+                  const PIcon = sound ? icons[sound.id] : null;
                   return (
                     <div key={p.id} style={{
                       display: "flex", alignItems: "center", gap: "10px",
                       background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)",
                       borderRadius: "9px", padding: "8px 10px",
                     }}>
-                      {Icon && <div style={{ width: "18px", height: "18px", color: "rgba(255,255,255,0.35)", flexShrink: 0 }}><Icon /></div>}
+                      {PIcon && <div style={{ width: "18px", height: "18px", color: "rgba(255,255,255,0.35)", flexShrink: 0 }}><PIcon /></div>}
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <div style={{ fontSize: "12px", color: "rgba(255,255,255,0.75)", fontFamily: "'Noto Sans JP', sans-serif" }}>{p.name}</div>
-                        <div style={{ fontSize: "10px", color: "rgba(255,255,255,0.3)", fontFamily: "'DM Mono', monospace" }}>
-                          {sound?.name} · vol {p.volume}
-                        </div>
+                        <div style={{ fontSize: "10px", color: "rgba(255,255,255,0.3)", fontFamily: "'DM Mono', monospace" }}>{sound?.name} · vol {p.volume}</div>
                       </div>
                       <button onClick={() => loadPreset(p)} style={{
                         background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.12)",
@@ -1422,8 +1679,7 @@ export default function RainMixer() {
                         background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)",
                         color: "rgba(255,255,255,0.3)", cursor: "pointer", fontSize: "10px",
                         display: "flex", alignItems: "center", justifyContent: "center",
-                        padding: 0, fontFamily: "inherit",
-                        transition: "all 0.15s",
+                        padding: 0, fontFamily: "inherit", transition: "all 0.15s",
                       }}
                         onMouseEnter={e => { e.currentTarget.style.background = "rgba(255,70,70,0.18)"; e.currentTarget.style.color = "rgba(255,130,130,0.9)"; }}
                         onMouseLeave={e => { e.currentTarget.style.background = "rgba(255,255,255,0.06)"; e.currentTarget.style.color = "rgba(255,255,255,0.3)"; }}
@@ -1435,17 +1691,16 @@ export default function RainMixer() {
             )}
           </div>
 
-        </div>
+        </div>{/* /player-card */}
 
         {/* Footer */}
         <div style={{ marginTop: "16px", textAlign: "center" }}>
           <a href="/privacy-policy.html" style={{
-            fontSize: "11px", color: "rgba(255,255,255,0.3)",
-            fontFamily: "'DM Mono', monospace", letterSpacing: "0.1em",
-            textDecoration: "none",
+            fontSize: "11px", color: "rgba(255,255,255,0.25)",
+            fontFamily: "'DM Mono', monospace", letterSpacing: "0.1em", textDecoration: "none",
           }}
-            onMouseEnter={e => e.currentTarget.style.color = "rgba(255,255,255,0.6)"}
-            onMouseLeave={e => e.currentTarget.style.color = "rgba(255,255,255,0.3)"}
+            onMouseEnter={e => e.currentTarget.style.color = "rgba(255,255,255,0.5)"}
+            onMouseLeave={e => e.currentTarget.style.color = "rgba(255,255,255,0.25)"}
           >PRIVACY POLICY</a>
         </div>
 
